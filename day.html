@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day Phase - Lihim Ng Baryo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <video id="bgVideo" autoplay muted loop playsinline class="bg-video">
+        <source src="assets/Day_BG.mp4" type="video/mp4">
+    </video>
+
+    <div class="container">
+        <h1>Day <span id="dayNumDisplay">1</span> — Night Summary</h1>
+
+        <div id="nightSummary" class="lobby"></div>
+
+        <div class="day-controls">
+            <!-- Normal button -->
+            <button id="discussionBtn" onclick="window.location.href='Discussion.html'">
+                Discussion
+            </button>
+
+            <!-- Kampanero skip button (hidden by default) -->
+            <button id="continueVoteBtn" style="display:none;" onclick="window.location.href='Voting.html'">
+                Continue to Vote
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

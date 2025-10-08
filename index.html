@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lihim Ng Baryo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="intro">
+  <video id="bgVideo" autoplay muted loop playsinline class="bg-video">
+    <source src="assets/Day_BG.mp4" type="video/mp4">
+  </video>
+
+
+  <video id="introVideo" class="intro-video" autoplay muted playsinline>
+    <source src="assets/INTRO.mp4" type="video/mp4">
+    Your browser does not support video.
+  </video>
+
+  <div id="skipMsg" class="skip-message">Click to skip / unmute...</div>
+
+  <div class="overlay">
+    <div class="overlay-content">
+      <h1 class="title">Lihim ng Baryo</h1>
+      <p class="producer">By Mito Studios</p>
+      <img src="assets/logo.png"  class="logo">
+    </div>
+    <button onclick="window.location.href='lobby.html'">Play</button>
+  </div>
+
+  <script>
+  const video = document.getElementById('introVideo');
+  const overlay = document.querySelector('.overlay');
+  const skipMsg = document.getElementById('skipMsg');
+
+  function showOverlay() {
+    overlay.classList.add('show');
+    skipMsg.style.display = 'none';
+  }
+
+  function hideVideoWithFade(duration = 600) {
+    // fade out the video then hide it
+    video.style.opacity = '0';
+    setTimeout(() => {
+      // fully remove from layout so body background shows
+      video.style.display = 'none';
+    }, duration);
+  }
+
+  // When video naturally ends
+  video.addEventListener('ended', () => {
+    hideVideoWithFade();
+    showOverlay();
+  });
+
+  // Click the video: first click unmute, second click skips (or you can use skipMsg)
+  video.addEventListener('click', () => {
+    if (video.muted) {
+      video.muted = false;
+      video.play();
+      skipMsg.textContent = 'Click again to skip';
+    } else {
+      hideVideoWithFade();
+      showOverlay();
+    }
+  });
+
+  // Make skip message clickable as well
+  skipMsg.addEventListener('click', () => {
+    hideVideoWithFade();
+    showOverlay();
+  });
+</script>
+
+
+</body>
+</html>

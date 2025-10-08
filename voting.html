@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Phase - Lihim Ng Baryo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <video id="bgVideo" autoplay muted loop playsinline class="bg-video">
+        <source src="assets/Day_BG.mp4" type="video/mp4">
+    </video>
+    <div class="container">
+        <h1>Voting Phase — Day <span id="voteDayNum">1</span></h1>
+        <p>Discuss and select a player to eliminate:</p>
+        <div id="voteOptions" class="lobby"></div>
+        <button class="skip" onclick="endVoting()">Skip Voting (No Elimination)</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobby - Lihim Ng Baryo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <video id="bgVideo" autoplay muted loop playsinline class="bg-video">
+        <source src="assets/Day_BG.mp4" type="video/mp4">
+    </video>
+    <div class="container">
+        <button class="back-button" onclick="window.location.href='index.html'">Back</button>
+        <h1>Game Lobby</h1>
+        <label class ="label"for="playerCount">Number of Players (6-12):</label>
+        <input type="number" id="playerCount" min="6" max="12" value="6">
+        <button onclick="createLobby()">Create Lobby & Assign Roles</button>
+        
+        <div id="lobbyInfo" class="lobby hidden">
+            <h2>Lobby Created</h2>
+            <div id="distribution" class="distribution-info"></div>
+            <h3>--- Assigned Roles ---</h3>
+            <ul id="playerList" class="player-list"></ul>
+            <button onclick="startGame()">Start Game</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

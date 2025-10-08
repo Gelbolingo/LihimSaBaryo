@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Over - Lihim Ng Baryo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <video id="bgVideo" autoplay muted loop playsinline class="bg-video">
+        <source src="assets/Day_BG.mp4" type="video/mp4">
+    </video>
+    <div class="container">
+        <h1 id="winnerTitle">Game Over</h1>
+        <div class="lobby">
+            <h2 id="winnerMessage"></h2>
+            <div id="finalRoster"></div>
+        </div>
+        <button onclick="window.location.href='index.html'">Return to Main Menu</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

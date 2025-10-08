@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Night Phase - Lihim Ng Baryo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <video id="bgVideo" autoplay muted loop playsinline class="bg-video">
+        <source src="assets/Day_BG.mp4" type="video/mp4">
+    </video>
+    <div class="container">
+        <h1>Night <span id="nightNumber">1</span> — Night Phase</h1>
+        <div class="player-card" id="playerCard">
+            <h2 id="playerName">Loading...</h2>
+            <h3 id="playerRole"></h3>
+            <div id="statusEffects" class="status-effects"></div>
+            
+            <div id="circleArea" class="circle-container hidden"></div>
+            
+            <div class="buttons">
+                <button id="useBtn" onclick="useSkill()">Use Skill</button>
+                <button class="skip" onclick="skipPlayer()">Skip</button>
+            </div>
+        </div>
+        
+        <div id="proceedArea" class="hidden">
+            <button onclick="window.location.href='day.html'">Proceed to Day Phase</button>
+        </div>
+    </div>
+
+    <!-- Role Reveal Card -->
+    <div id="revealCard" class="reveal-card hidden">
+    <div class="reveal-content">
+        <h2 id="revealTitle"></h2>
+        <p id="revealMessage"></p>
+        <button id="closeReveal">Close</button>
+    </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

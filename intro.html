@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intro - Lihim Ng Baryo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="intro">
+
+
+  <video id="introVideo" class="intro-video" autoplay  playsinline>
+    <source src="assets/INTRO.mp4" type="video/mp4">
+    Your browser does not support video.
+  </video>
+  <div id="skipMsg" class="skip-message">Click to skip / unmute...</div>
+
+  <script>
+    const video = document.getElementById('introVideo');
+
+    // Redirect after video ends
+    video.onended = () => {
+      window.location.href = "index.html";
+    };
+
+    // Allow skip or unmute
+    video.addEventListener("click", () => {
+      if (video.muted) {
+        video.muted = false; // unmute if muted
+        video.play();
+      } else {
+        window.location.href = "index.html"; // skip if already unmuted
+      }
+    });
+  </script>
+</body>
+</html>
