@@ -96,38 +96,39 @@
     }
 
     // ==================== REVEAL ====================
-    function isCreatureRole(role) {
-    return /\[CREATURE\]/.test(role);
-}
-
-function getAuraForPlayer(player) {
-    if (!player || !player.role || typeof player.role !== "string") return "Unknown";
-
-    if (isCreatureRole(player.role)) return "Maitim na Aura";
-    if (/\[KILLER\]|\[SUPPORT\]|\[UTILITY\]|\[RECON\]|\[DECEIVER\]/.test(player.role))
-        return "May Kapangyarihan";
-    return "Mortal";
-}
-
-function showImmediateReveal(actor, targetPlayer, skillType) {
-    if (!actor || !targetPlayer) return;
-
-    let message = "";
-
-    if (actor.role?.includes('Babaylan')) {
-        message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
-    } else if (skillType === 'reveal') {
-        message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
-    } else if (skillType === 'investigate' || skillType === 'observe') {
-        const aura = getAuraForPlayer(targetPlayer);
-        message = `You (Player ${actor.number} - ${actor.role}) discovered Player ${targetPlayer.number}: ${aura}`;
+    function getAuraForPlayer(player) {
+        if (!player || !player.role) return "Unknown";
+        if (isCreatureRole(player.role)) return "Maitim na Aura";
+        if (/\[KILLER\]|\[SUPPORT\]|\[UTILITY\]|\[RECON\]|\[DECEIVER\]/.test(player.role)) return "May Kapangyarihan";
+        return "Mortal";
     }
 
-    if (message) {
-        if (typeof showRevealCard === 'function') showRevealCard(message);
-        else console.log(message);
+    function showImmediateReveal(actor, targetPlayer, skillType) {
+        // actor: current player object; targetPlayer: the target player object
+        if (!actor || !targetPlayer) return;
+
+        let message = "";
+        // Babaylan reveals full role even if her skill type is 'investigate'
+        if (actor.role && actor.role.includes('Babaylan')) {
+            message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
+        } else if (skillType === 'reveal') {
+            // roles like Manananggal and Tiktik that have 'reveal' skill
+            message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
+        } else if (skillType === 'investigate') {
+            // This shouldn't happen anymore, but keeping for safety
+            const aura = getAuraForPlayer(targetPlayer);
+            message = `You (Player ${actor.number} - ${actor.role}) discovered Player ${targetPlayer.number}: ${aura}`;
+        } else if (skillType === 'observe') {
+            // Manlalakbay shows aura categories
+            const aura = getAuraForPlayer(targetPlayer);
+            message = `You (Player ${actor.number} - ${actor.role}) discovered Player ${targetPlayer.number}: ${aura}`;
+        }
+
+        if (message) {
+            // simple blocking display so the player sees the result before next turn
+            showRevealCard(message);
+        }
     }
-}
 
 
     // ==================== LOBBY PAGE ====================
