@@ -832,7 +832,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
             silencedDiv.style.backgroundColor = '#ffebcc';
             silencedDiv.style.border = '2px solid #ff9800';
             silencedDiv.style.borderRadius = '8px';
-            silencedDiv.innerHTML = "<h3 style='color: #e65100;'>⚠️ SILENCED PLAYERS (Cannot speak in discussion)</h3>" +
+            silencedDiv.innerHTML = "<h3 style='color: #e65100;'>⚠️ SILENCED PLAYERS (Cannot speak)</h3>" +
                 "<ul>" + silencedPlayers.map(p => `<li><strong>Player ${p.number}</strong> - ${p.role}</li>`).join("") + "</ul>";
             summary.appendChild(silencedDiv);
         }
@@ -846,7 +846,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
             paralyzedDiv.style.backgroundColor = '#e1f5fe';
             paralyzedDiv.style.border = '2px solid #03a9f4';
             paralyzedDiv.style.borderRadius = '8px';
-            paralyzedDiv.innerHTML = "<h3 style='color: #01579b;'>😴 PARALYZED PLAYERS (Cannot speak in discussion)</h3>" +
+            paralyzedDiv.innerHTML = "<h3 style='color: #01579b;'>😴 PARALYZED PLAYERS (Cannot speak or vote)</h3>" +
                 "<ul>" + paralyzedPlayers.map(p => `<li><strong>Player ${p.number}</strong> - ${p.role}</li>`).join("") + "</ul>";
             summary.appendChild(paralyzedDiv);
         }
@@ -890,8 +890,8 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
             case "investigate_fail": return `${actorText(e)} attempted to investigate Player ${e.targetNumber} but it failed.`;
             case "reveal": return `${actorText(e)} revealed Player ${e.targetNumber}: ${e.result}.`;
             case "observe": return `${actorText(e)} observed Player ${e.targetNumber}: ${e.result}.`;
-            case "haunt": return `${actorText(e)} haunted Player ${e.targetNumber} (cannot speak during discussion).`;
-            case "silence": return `${actorText(e)} silenced Player ${e.targetNumber}.`;
+            case "haunt": return `${actorText(e)} haunted Player ${e.targetNumber} (cannot speak or vote).`;
+            case "silence": return `${actorText(e)} silenced Player ${e.targetNumber} (cannot speak during discussion).`;
             case "revenge": return `Tiyanak (${e.targetName}) dragged down ${e.actorRole} (${e.actorName}) in revenge.`;
             case "revenge_vote": return `Tiyanak's dying revenge killed Player ${e.target} (${e.targetRole}).`;
             case "cancelAllAbilities": return `${actorText(e)} cancelled all human abilities tonight.`;
@@ -902,7 +902,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
     }
 
     // ==================== VOTING PHASE ====================
-	function initVotingPhase() {
+	ffunction initVotingPhase() {
 		const gameState = loadGameState();
 		if (!gameState) {
 			alert('No game found.');
@@ -916,8 +916,22 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
 		
 		// Sort players by number for voting display
 		const sortedPlayers = gameState.players
-			.filter(p => p.alive)
+			.filter(p => p.alive && !p.paralyzed)
 			.sort((a, b) => a.number - b.number);
+		
+		// Show message if there are paralyzed players who cannot vote
+		const paralyzedVoters = gameState.players.filter(p => p.alive && p.paralyzed);
+		if (paralyzedVoters.length > 0) {
+			const msgDiv = document.createElement('div');
+			msgDiv.style.padding = '10px';
+			msgDiv.style.marginBottom = '15px';
+			msgDiv.style.backgroundColor = '#e1f5fe';
+			msgDiv.style.border = '2px solid #03a9f4';
+			msgDiv.style.borderRadius = '8px';
+			msgDiv.style.color = '#01579b';
+			msgDiv.innerHTML = `<strong>Note:</strong> ${paralyzedVoters.map(p => `Player ${p.number}`).join(', ')} ${paralyzedVoters.length === 1 ? 'is' : 'are'} paralyzed and cannot vote.`;
+			voteOptions.insertAdjacentElement('beforebegin', msgDiv);
+		}
 		
 		voteOptions.innerHTML = sortedPlayers
 			.map(p => {
