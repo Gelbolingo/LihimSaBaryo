@@ -1,3 +1,9 @@
+/*Font Style*/
+@font-face {
+  font-family: 'Tarotheque';
+  src: url('fonts/Tarotheque.ttf') format('truetype');
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -30,10 +36,12 @@ body {
 
 .container p {
     color: black; /* makes the text white */
+    font-family: 'Tarotheque', serif;
 }
 
 .timer-container p {
     color: white; /* makes the text white */
+    font-family: 'Tarotheque', serif;
 }
 
 .intro-video {
@@ -63,11 +71,13 @@ h1 {
     color: #e10202; /* vivid red */
     margin-bottom: 20px;
     text-align: center;
+    font-family: 'Tarotheque', serif;
 }
 
 h2, h3 {
     color: #00a1f8; /* bright sky blue */
     margin: 15px 0;
+    font-family: 'Tarotheque', serif;
 }
 
 .producer {
