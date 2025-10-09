@@ -47,6 +47,15 @@
         return creatureCards.some(card => role.includes(card.split(' [')[0]));
     }
 
+    function getAuraForPlayer(player) {
+        if (!player || !player.role || typeof player.role !== "string") return "Unknown";
+
+        if (isCreatureRole(player.role)) return "Maitim na Aura";
+        if (/\[KILLER\]|\[SUPPORT\]|\[UTILITY\]|\[RECON\]|\[DECEIVER\]/.test(player.role))
+            return "May Kapangyarihan";
+        return "Mortal";
+    }
+
     function findPlayerByNumber(players, num) {
         return players.find(p => p.number === num);
     }
@@ -72,44 +81,7 @@
     function clearGameState() {
         localStorage.removeItem('gameState');
     }
-
-    // ==================== REVEAL CARD FUNCTION ====================
-    function showRevealCard(message) {
-        const card = document.getElementById("revealCard");
-        const titleEl = document.getElementById("revealTitle");
-        const msgEl = document.getElementById("revealMessage");
-        const closeBtn = document.getElementById("closeReveal");
-
-        if (!card) {
-            // Fallback if revealCard doesn't exist
-            alert(message);
-            return;
-        }
-
-        titleEl.textContent = "Revelation";
-        msgEl.textContent = message;
-        card.classList.remove("hidden");
-
-        closeBtn.onclick = () => {
-            card.classList.add("hidden");
-        };
-    }
-
     // ==================== REVEAL ====================
-    // Helper to check if role is a creature
-function isCreatureRole(role) {
-  return /\[CREATURE\]/.test(role);
-}
-
-function getAuraForPlayer(player) {
-  if (!player || !player.role || typeof player.role !== "string") return "Unknown";
-
-  if (isCreatureRole(player.role)) return "Maitim na Aura";
-  if (/\[KILLER\]|\[SUPPORT\]|\[UTILITY\]|\[RECON\]|\[DECEIVER\]/.test(player.role))
-    return "May Kapangyarihan";
-  return "Mortal";
-}
-
 // Display message with a "Next" button, waits until clicked
 function showRevealCard(message) {
   return new Promise(resolve => {
@@ -401,7 +373,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
         circleArea.classList.remove('hidden');
     };
 
-    function showTargetSelection(skill) {
+    async function showTargetSelection(skill) {
     if (!nightState) return;
 
     const { gameState, currentIndex } = nightState;
@@ -430,7 +402,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
                 div.className = 'player-circle';
                 div.textContent = `P${p.number}`;
 
-                div.onclick = () => {
+                div.onclick = async () => {
                     nightState.nightActions.push({
                         actorNumber: cur.number,
                         role: cur.role,
@@ -448,7 +420,30 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
                         }
                         cur.meta.baganiProtectedPlayers.push(p.number);
                     }
-                    // Removed immediate reveals - all reveals now processed in night resolution
+
+                    // IMMEDIATE REVEALS: Show role information immediately
+                    if (skill.type === "reveal" || skill.type === "investigate" || skill.type === "observe") {
+                        await showImmediateReveal(cur, p, skill.type);
+                    }
+
+                    nightState.currentIndex++;
+                    loadPlayer();
+                };
+
+                    cur.meta.cooldowns[skill.type] = skill.cooldown || 0;
+
+                    // Track Bagani protected players
+                    if (isBagani) {
+                        if (!cur.meta.baganiProtectedPlayers) {
+                            cur.meta.baganiProtectedPlayers = [];
+                        }
+                        cur.meta.baganiProtectedPlayers.push(p.number);
+                    }
+
+                    // IMMEDIATE REVEALS: Show role information immediately
+                    if (skill.type === "reveal" || skill.type === "investigate" || skill.type === "observe") {
+                        await showImmediateReveal(cur, p, skill.type);
+                    }
 
                     nightState.currentIndex++;
                     loadPlayer();
@@ -558,7 +553,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
             switch (a.type) {
                 case "haunt":
                     if (targ) {
-                        // Paralysis already applied in showTargetSelection
+                        targ.paralyzed = true;
                         addLog(a, { type: "haunt" });
                     }
                     break;
@@ -902,7 +897,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
     }
 
     // ==================== VOTING PHASE ====================
-	ffunction initVotingPhase() {
+	function initVotingPhase() {
 		const gameState = loadGameState();
 		if (!gameState) {
 			alert('No game found.');
