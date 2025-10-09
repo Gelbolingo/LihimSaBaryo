@@ -96,39 +96,67 @@
     }
 
     // ==================== REVEAL ====================
-    function getAuraForPlayer(player) {
-        if (!player || !player.role) return "Unknown";
-        if (isCreatureRole(player.role)) return "Maitim na Aura";
-        if (/\[KILLER\]|\[SUPPORT\]|\[UTILITY\]|\[RECON\]|\[DECEIVER\]/.test(player.role)) return "May Kapangyarihan";
-        return "Mortal";
-    }
+    // Helper to check if role is a creature
+function isCreatureRole(role) {
+  return /\[CREATURE\]/.test(role);
+}
 
-    function showImmediateReveal(actor, targetPlayer, skillType) {
-        // actor: current player object; targetPlayer: the target player object
-        if (!actor || !targetPlayer) return;
+function getAuraForPlayer(player) {
+  if (!player || !player.role || typeof player.role !== "string") return "Unknown";
 
-        let message = "";
-        // Babaylan reveals full role even if her skill type is 'investigate'
-        if (actor.role && actor.role.includes('Babaylan')) {
-            message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
-        } else if (skillType === 'reveal') {
-            // roles like Manananggal and Tiktik that have 'reveal' skill
-            message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
-        } else if (skillType === 'investigate') {
-            // This shouldn't happen anymore, but keeping for safety
-            const aura = getAuraForPlayer(targetPlayer);
-            message = `You (Player ${actor.number} - ${actor.role}) discovered Player ${targetPlayer.number}: ${aura}`;
-        } else if (skillType === 'observe') {
-            // Manlalakbay shows aura categories
-            const aura = getAuraForPlayer(targetPlayer);
-            message = `You (Player ${actor.number} - ${actor.role}) discovered Player ${targetPlayer.number}: ${aura}`;
-        }
+  if (isCreatureRole(player.role)) return "Maitim na Aura";
+  if (/\[KILLER\]|\[SUPPORT\]|\[UTILITY\]|\[RECON\]|\[DECEIVER\]/.test(player.role))
+    return "May Kapangyarihan";
+  return "Mortal";
+}
 
-        if (message) {
-            // simple blocking display so the player sees the result before next turn
-            showRevealCard(message);
-        }
-    }
+// Display message with a "Next" button, waits until clicked
+function showRevealCard(message) {
+  return new Promise(resolve => {
+    // Create overlay
+    const overlay = document.createElement("div");
+    overlay.className = "reveal-overlay";
+
+    // Card container
+    const card = document.createElement("div");
+    card.className = "reveal-card";
+    card.innerHTML = `
+      <p>${message}</p>
+      <button class="next-btn">Next</button>
+    `;
+
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+
+    // Handle button click
+    card.querySelector(".next-btn").addEventListener("click", () => {
+      overlay.remove();
+      resolve(); // Continue game after click
+    });
+  });
+}
+
+// Main reveal logic
+async function showImmediateReveal(actor, targetPlayer, skillType) {
+  if (!actor || !targetPlayer) return;
+
+  let message = "";
+
+  if (actor.role?.includes("Babaylan")) {
+    message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
+    await showRevealCard(message); // waits for click
+  } 
+  else if (skillType === "reveal") {
+    message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
+    await showRevealCard(message);
+  } 
+  else if (skillType === "investigate" || skillType === "observe") {
+    const aura = getAuraForPlayer(targetPlayer);
+    message = `You (Player ${actor.number} - ${actor.role}) discovered Player ${targetPlayer.number}: ${aura}`;
+    await showRevealCard(message);
+  }
+}
+
 
     // ==================== LOBBY PAGE ====================
     window.createLobby = function() {
