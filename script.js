@@ -448,15 +448,6 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
                         }
                         cur.meta.baganiProtectedPlayers.push(p.number);
                     }
-
-                    // BATIBAT FIX: Apply paralysis immediately when Batibat targets someone
-
-                    // BATIBAT FIX: Apply paralysis immediately when Batibat targets someone
-                    if (skill.type === "haunt" && p) {
-                        p.paralyzed = true;
-                        alert(`Player ${p.number} has been paralyzed and cannot act tonight!`);
-                    }
-
                     // Removed immediate reveals - all reveals now processed in night resolution
 
                     nightState.currentIndex++;
@@ -563,13 +554,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
                 canceledActionIndices.add(i);
                 return;
             }
-
-            // Check if actor is paralyzed (skip their action)
-            if (actor && actor.paralyzed && a.type !== "haunt") {
-                canceledActionIndices.add(i);
-                return;
-            }
-
+            
             switch (a.type) {
                 case "haunt":
                     if (targ) {
@@ -852,6 +837,20 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
             summary.appendChild(silencedDiv);
         }
 
+        // Display paralyzed players
+        const paralyzedPlayers = gameState.players.filter(p => p.alive && p.paralyzed);
+        if (paralyzedPlayers.length > 0) {
+            const paralyzedDiv = document.createElement('div');
+            paralyzedDiv.style.marginTop = '20px';
+            paralyzedDiv.style.padding = '15px';
+            paralyzedDiv.style.backgroundColor = '#e1f5fe';
+            paralyzedDiv.style.border = '2px solid #03a9f4';
+            paralyzedDiv.style.borderRadius = '8px';
+            paralyzedDiv.innerHTML = "<h3 style='color: #01579b;'>😴 PARALYZED PLAYERS (Cannot speak in discussion)</h3>" +
+                "<ul>" + paralyzedPlayers.map(p => `<li><strong>Player ${p.number}</strong> - ${p.role}</li>`).join("") + "</ul>";
+            summary.appendChild(paralyzedDiv);
+        }
+
         const discussionBtn = document.getElementById('discussionBtn');
         const continueVoteBtn = document.getElementById('continueVoteBtn');
 
@@ -891,7 +890,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
             case "investigate_fail": return `${actorText(e)} attempted to investigate Player ${e.targetNumber} but it failed.`;
             case "reveal": return `${actorText(e)} revealed Player ${e.targetNumber}: ${e.result}.`;
             case "observe": return `${actorText(e)} observed Player ${e.targetNumber}: ${e.result}.`;
-            case "haunt": return `${actorText(e)} haunted Player ${e.targetNumber} (paralyzed for the night).`;
+            case "haunt": return `${actorText(e)} haunted Player ${e.targetNumber} (cannot speak during discussion).`;
             case "silence": return `${actorText(e)} silenced Player ${e.targetNumber}.`;
             case "revenge": return `Tiyanak (${e.targetName}) dragged down ${e.actorRole} (${e.actorName}) in revenge.`;
             case "revenge_vote": return `Tiyanak's dying revenge killed Player ${e.target} (${e.targetRole}).`;
