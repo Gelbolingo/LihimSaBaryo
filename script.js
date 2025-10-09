@@ -430,25 +430,6 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
                     loadPlayer();
                 };
 
-                    cur.meta.cooldowns[skill.type] = skill.cooldown || 0;
-
-                    // Track Bagani protected players
-                    if (isBagani) {
-                        if (!cur.meta.baganiProtectedPlayers) {
-                            cur.meta.baganiProtectedPlayers = [];
-                        }
-                        cur.meta.baganiProtectedPlayers.push(p.number);
-                    }
-
-                    // IMMEDIATE REVEALS: Show role information immediately
-                    if (skill.type === "reveal" || skill.type === "investigate" || skill.type === "observe") {
-                        await showImmediateReveal(cur, p, skill.type);
-                    }
-
-                    nightState.currentIndex++;
-                    loadPlayer();
-                };
-
                 circleArea.appendChild(div);
             }
         });
