@@ -130,7 +130,6 @@
         }
     }
 
-
     // ==================== LOBBY PAGE ====================
     window.createLobby = function() {
         const countInput = document.getElementById('playerCount');
