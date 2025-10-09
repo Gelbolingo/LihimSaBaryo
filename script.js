@@ -60,6 +60,8 @@
         return players.find(p => p.number === num);
     }
 
+
+
     function saveGameState(state) {
         try {
             localStorage.setItem('gameState', JSON.stringify(state));
@@ -81,6 +83,29 @@
     function clearGameState() {
         localStorage.removeItem('gameState');
     }
+
+    // ==================== REVEAL CARD FUNCTION ====================
+    function showRevealCard(message) {
+        const card = document.getElementById("revealCard");
+        const titleEl = document.getElementById("revealTitle");
+        const msgEl = document.getElementById("revealMessage");
+        const closeBtn = document.getElementById("closeReveal");
+
+        if (!card) {
+            // Fallback if revealCard doesn't exist
+            alert(message);
+            return;
+        }
+
+        titleEl.textContent = "Revelation";
+        msgEl.textContent = message;
+        card.classList.remove("hidden");
+
+        closeBtn.onclick = () => {
+            card.classList.add("hidden");
+        };
+    }
+
     // ==================== REVEAL ====================
 // Display message with a "Next" button, waits until clicked
 function showRevealCard(message) {
@@ -115,16 +140,16 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
   let message = "";
 
   if (actor.role?.includes("Babaylan")) {
-    message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
+    message = `(Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
     await showRevealCard(message); // waits for click
   } 
   else if (skillType === "reveal") {
-    message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
+    message = `(Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
     await showRevealCard(message);
   } 
   else if (skillType === "investigate" || skillType === "observe") {
     const aura = getAuraForPlayer(targetPlayer);
-    message = `You (Player ${actor.number} - ${actor.role}) discovered Player ${targetPlayer.number}: ${aura}`;
+    message = `(Player ${actor.number} - ${actor.role}) discovered Player ${targetPlayer.number}: ${aura}`;
     await showRevealCard(message);
   }
 }
@@ -313,9 +338,9 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
         
         const isTagabaryo = player.role.includes('Tagabaryo');
         const isTiyanak = player.role.includes('Tiyanak');
-        const isParalyzed = player.paralyzed;
+        // Paralyzed players CAN still use abilities (only affects day phase)
         
-        document.getElementById('useBtn').style.display = (player.alive && !isTagabaryo && !isTiyanak && !isParalyzed) ? 'inline-block' : 'none';
+        document.getElementById('useBtn').style.display = (player.alive && !isTagabaryo && !isTiyanak) ? 'inline-block' : 'none';
     }
 
     window.useSkill = function() {
@@ -325,13 +350,6 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
         const cur = gameState.players[currentIndex];
 
         if (!cur || !cur.alive) {
-            nightState.currentIndex++;
-            loadPlayer();
-            return;
-        }
-
-        if (cur.paralyzed) {
-            alert('You are paralyzed by Batibat and cannot use your ability tonight!');
             nightState.currentIndex++;
             loadPlayer();
             return;
@@ -373,7 +391,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
         circleArea.classList.remove('hidden');
     };
 
-    async function showTargetSelection(skill) {
+    function showTargetSelection(skill) {
     if (!nightState) return;
 
     const { gameState, currentIndex } = nightState;
@@ -402,7 +420,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
                 div.className = 'player-circle';
                 div.textContent = `P${p.number}`;
 
-                div.onclick = async () => {
+                div.onclick = () => {
                     nightState.nightActions.push({
                         actorNumber: cur.number,
                         role: cur.role,
@@ -420,11 +438,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
                         }
                         cur.meta.baganiProtectedPlayers.push(p.number);
                     }
-
-                    // IMMEDIATE REVEALS: Show role information immediately
-                    if (skill.type === "reveal" || skill.type === "investigate" || skill.type === "observe") {
-                        await showImmediateReveal(cur, p, skill.type);
-                    }
+                    // Removed immediate reveals - all reveals now processed in night resolution
 
                     nightState.currentIndex++;
                     loadPlayer();
