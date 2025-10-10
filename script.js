@@ -162,7 +162,7 @@
                 protectedBy: null,
                 anting: 0,
                 cursed: false,
-                cursedBy: null,
+                curseAppliedNight: null,
                 curseAppliedNight: null,
                 silenced: false,
                 paralyzed: false,
@@ -554,11 +554,11 @@
                     }
                     break;
                 case "albularyo_protect":
-                    if (targ) {
+                        if (targ) {
                         if (targ.cursed) {
                             targ.cursed = false;
                             targ.cursedBy = null;
-                            targ.curseAppliedNight = null; // Clear curse tracking
+                            targ.curseAppliedNight = null;
                             addLog(a, { type: "heal_curse" });
                         }
                         if (targ.silenced) {
@@ -600,7 +600,7 @@
                     if (targ) {
                         targ.cursed = true;
                         targ.cursedBy = actor.number;
-                        targ.curseAppliedNight = gameState.dayNumber; // Track when curse was applied
+                        targ.curseAppliedNight = gameState.dayNumber;
                         addLog(a, { type: "curse" });
                     }
                     break;
@@ -702,29 +702,27 @@
         }
 
         // ======= PHASE 5: Cursed deaths (only if Mangkukulam is alive AND curse was applied last night) =======
-        gameState.players.forEach(p => {
-            if (p.cursed && p.alive && p.cursedBy && p.curseAppliedNight) {
-                const mangkukulam = findPlayerByNumber(gameState.players, p.cursedBy);
-                // Check if curse was applied on the previous night (not current night)
-                const curseIsReady = p.curseAppliedNight < gameState.dayNumber;
-                
-                if (mangkukulam && mangkukulam.alive && curseIsReady) {
-                    p.alive = false;
-                    gameState.nightLog.push({
-                        actorName: `Player ${p.number}`,
-                        actorRole: p.role,
-                        skillName: "Cursed Death",
-                        type: "cursed_death",
-                        target: p.number
-                    });
-                } else if (!mangkukulam || !mangkukulam.alive) {
-                    // Mangkukulam died, curse is lifted
-                    p.cursed = false;
-                    p.cursedBy = null;
-                    p.curseAppliedNight = null;
-                }
-            }
-        });
+gameState.players.forEach(p => {
+    if (p.cursed && p.alive && p.cursedBy && p.curseAppliedNight) {
+        const mangkukulam = findPlayerByNumber(gameState.players, p.cursedBy);
+        const curseIsReady = p.curseAppliedNight < gameState.dayNumber;
+        
+        if (mangkukulam && mangkukulam.alive && curseIsReady) {
+            p.alive = false;
+            gameState.nightLog.push({
+                actorName: `Player ${p.number}`,
+                actorRole: p.role,
+                skillName: "Cursed Death",
+                type: "cursed_death",
+                target: p.number
+            });
+        } else if (!mangkukulam || !mangkukulam.alive) {
+            p.cursed = false;
+            p.cursedBy = null;
+            p.curseAppliedNight = null;
+        }
+    }
+});
 
         // ======= PHASE 6: Cooldowns and cleanup =======
         gameState.players.forEach(p => {
