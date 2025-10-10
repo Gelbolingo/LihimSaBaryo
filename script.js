@@ -559,9 +559,21 @@ btn.textContent = cd > 0 ? `${skill.name} (Available in ${cd} ${daysText})` : sk
                 addLog(a, { type: "kapre_block" });
             }
             if (a.type === "skipDiscussion") {
-                gameState.skipDiscussion = true;
-                addLog(a, { type: "skipDiscussion" });
+                // Only skip if Duwende didn't cancel abilities
+                const duwendeCancelled = nightActions.some(act => act.type === "cancelAllAbilities");
+                if (!duwendeCancelled) {
+                    gameState.skipDiscussion = true;
+                    addLog(a, { type: "skipDiscussion" });
+                } else {
+                    // Duwende overrides Kampanero’s skip
+                    gameState.skipDiscussion = false;
+                    addLog(a, {
+                        type: "cancelled_action",
+                        text: "Kampanero’s bell was silenced by Duwende. Discussion will proceed as normal."
+                    });
+                }
             }
+
         });
 
         const canceledActionIndices = new Set();
