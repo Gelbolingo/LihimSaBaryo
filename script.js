@@ -118,11 +118,7 @@
     if (duwendeCancelled && 
         (actor.role.includes('Babaylan') || actor.role.includes('Manlalakbay'))) {
         return; // Skip the popup
-    }
-
-    let message = "";
-
-        if (actor.role?.includes("Babaylan")) {
+    } else if (actor.role?.includes("Babaylan")) {
             message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
             await showRevealCard(message);
         } 
@@ -134,7 +130,10 @@
             const aura = getAuraForPlayer(targetPlayer);
             message = `You (Player ${actor.number} - ${actor.role}) discovered Player ${targetPlayer.number}: ${aura}`;
             await showRevealCard(message);
-        }
+        } 
+    let message = "";
+
+        
     }
 
     // ==================== LOBBY PAGE ====================
