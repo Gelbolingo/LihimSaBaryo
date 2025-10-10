@@ -362,7 +362,8 @@
                 const btn = document.createElement('button');
                 btn.className = 'skill-btn';
                 const cd = cur.meta.cooldowns[skill.type] || 0;
-                btn.textContent = cd > 0 ? `${skill.name} (Cooldown: ${cd})` : skill.name;
+                const daysText = cd === 1 ? 'day' : 'days';
+btn.textContent = cd > 0 ? `${skill.name} (Available in ${cd} ${daysText})` : skill.name;
                 btn.disabled = cd > 0;
 
                 btn.onclick = () => {
@@ -510,7 +511,11 @@
             }
             if (a.type === "cancelAllAbilities") {
                 gameState.players.forEach(p => {
-                    if (!isCreatureRole(p.role) && p.role !== 'Tagabaryo') {
+                    if (!isCreatureRole(p.role) && 
+                        p.role !== 'Tagabaryo' && 
+                        !p.role.includes('Mang-aanting') &&
+                        !p.role.includes('Babaylan') &&
+                        !p.role.includes('Manlalakbay')) {
                         p.skillCancelled = true;
                     }
                 });
