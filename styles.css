@@ -4,7 +4,6 @@
   src: url('fonts/Tarotheque.ttf') format('truetype');
 }
 
-
 html, body {
   height: 100%;
   width: 100%;
@@ -163,7 +162,7 @@ input[type="number"] {
     padding: 12px;
     margin: 8px 0;
     border-radius: 6px;
-    /*border-left: 4px solid #667eea;  soft periwinkle blue */
+    /*border-left: 4px solid #667eea; soft periwinkle blue */
 }
 
 .player-card {
