@@ -4,24 +4,33 @@
   src: url('fonts/Tarotheque.ttf') format('truetype');
 }
 
+
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; 
+}
+
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* soft periwinkle blue to medium purple */
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-
-   /* background: url("assets/Background.png") center center / cover no-repeat fixed;
-    background-size: cover;*/
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  height: 100vh; /* Lock to screen height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  /* background: url("assets/Background.png") center center / cover no-repeat fixed;
+  background-size: cover; */
 }
+
 
 .container {
     background: rgba(137, 137, 137, 0.322); /* light gray with transparency */
@@ -68,21 +77,21 @@ body {
 }
 
 h1 {
-    color: #e10202; /* vivid red */
+    color: #af0202; /* vivid red */
     margin-bottom: 20px;
     text-align: center;
     font-family: 'Tarotheque', serif;
 }
 
 h2, h3 {
-    color: #00a1f8; /* bright sky blue */
+    color: #000000; /* bright sky blue */
     margin: 15px 0;
     font-family: 'Tarotheque', serif;
 }
 
 .producer {
     text-align: center;
-    color: #d1d1d1; /* medium light gray */
+    color: #ffffff; /* medium light gray */
     margin-bottom: 30px;
 }
 
@@ -136,7 +145,7 @@ input[type="number"] {
 }
 
 .lobby {
-    background: #f8f9fa; /* very light gray / off-white */
+    background: #E5E5E5;  /*very light gray / off-white */
     padding: 20px;
     border-radius: 8px;
     margin: 20px 0;
@@ -154,11 +163,11 @@ input[type="number"] {
     padding: 12px;
     margin: 8px 0;
     border-radius: 6px;
-    border-left: 4px solid #667eea; /* soft periwinkle blue */
+    /*border-left: 4px solid #667eea;  soft periwinkle blue */
 }
 
 .player-card {
-    background: #f8f9fa; /* very light gray / off-white */
+    background: #E5E5E5; /* very light gray / off-white */
     padding: 30px;
     border-radius: 8px;
     text-align: center;
@@ -320,27 +329,22 @@ body.intro {
 
 /* Overlay container hidden by default */
 .overlay {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    height: 100vh;
-    padding: 40px;
-    text-align: center;
-    color: white; /* pure white */
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.8); /* translucent black shadow */
-
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 1s ease;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;  /* centers vertically */
+  align-items: center;      /* centers horizontally */
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
 }
 
 /* Show overlay after video ends or skip */
 .overlay.show {
-    opacity: 1;
-    pointer-events: auto;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Fade-in animation keyframes */
@@ -370,15 +374,14 @@ body.intro {
 
 /* Button at bottom */
 .overlay button {
-    padding: 12px 25px;
-    font-size: 1.2em;
-    border: none;
-    border-radius: 8px;
-    background: rgba(0,0,0,0.7); /* translucent black */
-    color: white; /* pure white */
-    cursor: pointer;
-    transition: background 0.3s;
-    margin-bottom: 20px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 1.5rem;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 40px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 .overlay button:hover {
     background: rgba(255,255,255,0.8); /* translucent white */
@@ -401,7 +404,7 @@ body.intro {
 }
 
 .title{
-    color: #e10202; /* vivid red */
+    color: #af0202; /* vivid red */
     margin-bottom: 20px;
     text-align: center;
 }
@@ -445,7 +448,7 @@ body.intro {
 
 /* Reveal Card - The popup box */
 .reveal-card {
-    background: linear-gradient(135deg, #e10202 0%, #764ba2 100%);
+    background-color: #0B132B;
     padding: 40px 50px;
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
