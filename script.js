@@ -547,7 +547,12 @@ btn.textContent = cd > 0 ? `${skill.name} (Available in ${cd} ${daysText})` : sk
                         p.skillCancelled = true;
                     }
                 });
-                addLog(a, { type: "cancelAllAbilities" });
+                gameState.skipDiscussion = false;
+                addLog(a, {
+                    type: "cancelAllAbilities",
+                    text: "Duwende cancelled Kampanero abilities — discussion will continue as normal.",
+                });
+                
             }
             if (a.type === "blockInvestigations") {
                 global.kapreBlockInvestigations = true;
