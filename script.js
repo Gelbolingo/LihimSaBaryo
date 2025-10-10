@@ -105,10 +105,21 @@
         });
     }
 
-    async function showImmediateReveal(actor, targetPlayer, skillType) {
-        if (!actor || !targetPlayer) return;
+    async function showImmediateReveal(actor, targetPlayer, skillType, gameState) {
+    if (!actor || !targetPlayer) return;
 
-        let message = "";
+    // Check if Duwende cancelled abilities this night
+    const duwendeCancelled = gameState.nightActions.some(
+        a => a.type === "cancelAllAbilities"
+    );
+    
+    // If Duwende cancelled and this is Babaylan or Manlalakbay, don't show popup
+    if (duwendeCancelled && 
+        (actor.role.includes('Babaylan') || actor.role.includes('Manlalakbay'))) {
+        return; // Skip the popup
+    }
+
+    let message = "";
 
         if (actor.role?.includes("Babaylan")) {
             message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
@@ -440,7 +451,17 @@ btn.textContent = cd > 0 ? `${skill.name} (Available in ${cd} ${daysText})` : sk
                     }
 
                     if (skill.type === "reveal" || skill.type === "investigate" || skill.type === "observe") {
-                        await showImmediateReveal(cur, p, skill.type);
+                        // Check if Duwende already cancelled abilities this night
+                        const duwendeAlreadyCancelled = nightState.nightActions.some(
+                            a => a.type === "cancelAllAbilities"
+                        );
+                        
+                        // Only show popup if Duwende hasn't cancelled, OR if this is a creature's reveal (Tiktik/Manananggal)
+                        const isCreatureRevealer = isCreatureRole(cur.role);
+                        
+                        if (!duwendeAlreadyCancelled || isCreatureRevealer) {
+                            await showImmediateReveal(cur, p, skill.type);
+                        }
                     }
 
                     nightState.currentIndex++;
