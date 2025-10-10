@@ -544,9 +544,19 @@ btn.textContent = cd > 0 ? `${skill.name} (Available in ${cd} ${daysText})` : sk
                 addLog(a, { type: "kapre_block" });
             }
             if (a.type === "skipDiscussion") {
-                gameState.skipDiscussion = true;
-                addLog(a, { type: "skipDiscussion" });
+                const actor = findPlayerByNumber(gameState.players, a.actorNumber);
+            
+                // Only allow Kampanero’s skill if not cancelled by Duwende
+                if (actor && !actor.skillCancelled) {
+                    gameState.skipDiscussion = true;
+                    addLog(a, { type: "skipDiscussion" });
+                } else {
+                    // Kampanero’s action was cancelled — discussion will proceed
+                    addLog(a, { type: "cancelled_action", cancelled: true });
+                    gameState.skipDiscussion = false;
+                }
             }
+
         });
 
         const canceledActionIndices = new Set();
