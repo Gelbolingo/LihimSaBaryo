@@ -103,6 +103,7 @@ button {
     font-size: 16px;
     transition: all 0.3s;
     margin: 5px;
+    font-family: 'Tarotheque', serif;
 }
 
 button:hover:not(:disabled) {
