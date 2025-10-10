@@ -271,21 +271,6 @@
             nightActions: []
         };
 
-        document.getElementById('nightNumber').textContent = gameState.dayNumber;
-        // Check if Duwende used cancel last night and block human abilities
-        const lastNight = gameState.nightLog || [];
-        const duwendeCancelled = lastNight.some(
-            entry => entry.type === "cancelAllAbilities"
-        );
-
-        if (duwendeCancelled) {
-            gameState.players.forEach(p => {
-                if (!isCreatureRole(p.role) && p.role !== "Tagabaryo") {
-                    p.skillCancelled = true;
-                }
-            });
-        }
-
         loadPlayer();
     }
 
