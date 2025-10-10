@@ -652,18 +652,40 @@ btn.textContent = cd > 0 ? `${skill.name} (Available in ${cd} ${daysText})` : sk
         
             const actor = findPlayerByNumber(gameState.players, a.actorNumber);
             
-            // Check if this action was cancelled by Duwende or other effects
-            if (actor && actor.skillCancelled && !isCreatureRole(actor.role)) {
-                canceledActionIndices.add(i);
-                return; // Skip completely - no logging
-            }
+           // Handle Duwende cancel effects for Babaylan / Manlalakbay (reveal-type skills)
+            if (
+                duwendeCancelled &&
+                actor &&
+                !isCreatureRole(actor.role) &&
+                (actor.role.includes("Babaylan") || actor.role.includes("Manlalakbay"))
+            ) {
+                const targ = findPlayerByNumber(gameState.players, a.target);
+                if (targ) {
+                    const aura = getAuraForPlayer(targ);
+                    const resultText =
+                        a.type === "reveal"
+                            ? `${targ.role}`
+                            : a.type === "investigate"
+                            ? isCreatureRole(targ.role)
+                                ? "Mythical"
+                                : "Human"
+                            : aura;
             
-            // Double-check Duwende cancellation for non-immune human abilities
-            if (duwendeCancelled && actor && !isCreatureRole(actor.role) && 
-                !actor.role.includes('Babaylan') && !actor.role.includes('Manlalakbay')) {
+                    gameState.nightLog.push({
+                        actorNumber: actor.number,
+                        actorName: `Player ${actor.number}`,
+                        actorRole: actor.role,
+                        skillName: a.skillName || a.type,
+                        targetNumber: targ.number,
+                        targetName: `Player ${targ.number}`,
+                        type: "cancelled_reveal",
+                        result: `${resultText} but cancelled by Duwende's skill`,
+                    });
+                }
                 canceledActionIndices.add(i);
-                return; // Skip completely - no logging
+                return;
             }
+
         
             const targ = findPlayerByNumber(gameState.players, a.target);
 
