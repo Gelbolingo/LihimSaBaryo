@@ -1,8 +1,7 @@
-
 (function() {
     // ==================== CONFIGURATION ====================
     const roleConfig = {
-        6: { creatures: 2, humans: 5, abilities: 3, villagers: 1 },
+        6: { creatures: 2, humans: 5, abilities: 4, villagers: 1 },
         7: { creatures: 2, humans: 5, abilities: 4, villagers: 1 },
         8: { creatures: 2, humans: 6, abilities: 4, villagers: 2 },
         9: { creatures: 3, humans: 6, abilities: 4, villagers: 2 },
