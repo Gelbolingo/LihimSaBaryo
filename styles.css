@@ -1,7 +1,7 @@
 /*Font Style*/
 @font-face {
   font-family: 'Tarotheque';
-  src: url('fonts/Tarotheque.ttf') format('truetype');
+  src: url('fonts/tarotheque.ttf') format('truetype');
 }
 
 html, body {
