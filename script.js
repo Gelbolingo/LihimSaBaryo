@@ -163,6 +163,7 @@
                 anting: 0,
                 cursed: false,
                 cursedBy: null,
+                curseAppliedNight: null,
                 silenced: false,
                 paralyzed: false,
                 immuneToInvestigations: finalRole.includes('Mang-aanting'),
@@ -557,6 +558,7 @@
                         if (targ.cursed) {
                             targ.cursed = false;
                             targ.cursedBy = null;
+                            targ.curseAppliedNight = null; // Clear curse tracking
                             addLog(a, { type: "heal_curse" });
                         }
                         if (targ.silenced) {
@@ -598,6 +600,7 @@
                     if (targ) {
                         targ.cursed = true;
                         targ.cursedBy = actor.number;
+                        targ.curseAppliedNight = gameState.dayNumber; // Track when curse was applied
                         addLog(a, { type: "curse" });
                     }
                     break;
@@ -698,11 +701,14 @@
             });
         }
 
-        // ======= PHASE 5: Cursed deaths (only if Mangkukulam is alive) =======
+        // ======= PHASE 5: Cursed deaths (only if Mangkukulam is alive AND curse was applied last night) =======
         gameState.players.forEach(p => {
-            if (p.cursed && p.alive && p.cursedBy) {
+            if (p.cursed && p.alive && p.cursedBy && p.curseAppliedNight) {
                 const mangkukulam = findPlayerByNumber(gameState.players, p.cursedBy);
-                if (mangkukulam && mangkukulam.alive) {
+                // Check if curse was applied on the previous night (not current night)
+                const curseIsReady = p.curseAppliedNight < gameState.dayNumber;
+                
+                if (mangkukulam && mangkukulam.alive && curseIsReady) {
                     p.alive = false;
                     gameState.nightLog.push({
                         actorName: `Player ${p.number}`,
@@ -711,10 +717,11 @@
                         type: "cursed_death",
                         target: p.number
                     });
-                } else {
+                } else if (!mangkukulam || !mangkukulam.alive) {
                     // Mangkukulam died, curse is lifted
                     p.cursed = false;
                     p.cursedBy = null;
+                    p.curseAppliedNight = null;
                 }
             }
         });
