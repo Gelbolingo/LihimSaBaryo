@@ -559,23 +559,20 @@ btn.textContent = cd > 0 ? `${skill.name} (Available in ${cd} ${daysText})` : sk
                 addLog(a, { type: "kapre_block" });
             }
             if (a.type === "skipDiscussion") {
-            // Check if Duwende already cancelled abilities
-            const duwendeCancelled = nightActions.some(act => act.type === "cancelAllAbilities");
-        
-            if (!duwendeCancelled) {
-                // Kampanero's bell works normally
-                gameState.skipDiscussion = true;
-                addLog(a, { type: "skipDiscussion" });
-            } else {
-                // Duwende overrides Kampanero — discussion will proceed
-                gameState.skipDiscussion = false;
-                addLog(a, {
-                    type: "cancelled_action",
-                    text: "Kampanero’s bell was silenced by Duwende — discussion will proceed as normal."
-                });
+                // Only skip if Duwende didn't cancel abilities
+                const duwendeCancelled = nightActions.some(act => act.type === "cancelAllAbilities");
+                if (!duwendeCancelled) {
+                    gameState.skipDiscussion = true;
+                    addLog(a, { type: "skipDiscussion" });
+                } else {
+                    // Duwende overrides Kampanero’s skip
+                    gameState.skipDiscussion = false;
+                    addLog(a, {
+                        type: "cancelled_action",
+                        text: "Kampanero’s bell was silenced by Duwende. Discussion will proceed as normal."
+                    });
+                }
             }
-        }
-
 
         });
 
@@ -901,23 +898,16 @@ gameState.players.forEach(p => {
         const continueVoteBtn = document.getElementById('continueVoteBtn');
 
         if (gameState.skipDiscussion) {
-            // Kampanero successfully skipped discussion
             discussionBtn.style.display = 'none';
             continueVoteBtn.style.display = 'block';
-            continueVoteBtn.textContent = 'Continue to Vote';
             continueVoteBtn.onclick = () => {
                 window.location.href = 'voting.html';
             };
         } else {
-            // Duwende cancelled or normal flow — go to discussion
             discussionBtn.style.display = 'block';
             continueVoteBtn.style.display = 'none';
-            discussionBtn.textContent = 'Start Discussion';
-            discussionBtn.onclick = () => {
-                window.location.href = 'discussion.html';
-            };
         }
-
+    }
 
     function formatEvent(e) {
         function actorText(e) {
