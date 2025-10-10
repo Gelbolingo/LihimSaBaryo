@@ -106,19 +106,22 @@
         });
     }
 
-    async function showImmediateReveal(actor, targetPlayer, skillType, gameState) {
+    async function showImmediateReveal(actor, targetPlayer, skillType, nightActions) {
     if (!actor || !targetPlayer) return;
 
     // Check if Duwende cancelled abilities this night
-    const duwendeCancelled = gameState.nightActions.some(
+    const duwendeCancelled = nightActions.some(
         a => a.type === "cancelAllAbilities"
     );
     
-    // If Duwende cancelled and this is Babaylan or Manlalakbay, don't show popup
-    if (duwendeCancelled && 
-        (actor.role.includes('Babaylan') || actor.role.includes('Manlalakbay'))) {
-        return; // Skip the popup
-    } else if (actor.role?.includes("Babaylan")) {
+    // If Duwende cancelled and this is a human ability user, don't show popup
+    if (duwendeCancelled && !isCreatureRole(actor.role)) {
+        return; // Skip the popup for cancelled human abilities
+    }
+
+    let message = "";
+
+        if (actor.role?.includes("Babaylan")) {
             message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
             await showRevealCard(message);
         } 
@@ -130,10 +133,7 @@
             const aura = getAuraForPlayer(targetPlayer);
             message = `You (Player ${actor.number} - ${actor.role}) discovered Player ${targetPlayer.number}: ${aura}`;
             await showRevealCard(message);
-        } 
-    let message = "";
-
-        
+        }
     }
 
     // ==================== LOBBY PAGE ====================
@@ -451,17 +451,7 @@ btn.textContent = cd > 0 ? `${skill.name} (Available in ${cd} ${daysText})` : sk
                     }
 
                     if (skill.type === "reveal" || skill.type === "investigate" || skill.type === "observe") {
-                        // Check if Duwende already cancelled abilities this night
-                        const duwendeAlreadyCancelled = nightState.nightActions.some(
-                            a => a.type === "cancelAllAbilities"
-                        );
-                        
-                        // Only show popup if Duwende hasn't cancelled, OR if this is a creature's reveal (Tiktik/Manananggal)
-                        const isCreatureRevealer = isCreatureRole(cur.role);
-                        
-                        if (!duwendeAlreadyCancelled || isCreatureRevealer) {
-                            await showImmediateReveal(cur, p, skill.type);
-                        }
+                        await showImmediateReveal(cur, p, skill.type, nightState.nightActions);
                     }
 
                     nightState.currentIndex++;
@@ -568,7 +558,10 @@ btn.textContent = cd > 0 ? `${skill.name} (Available in ${cd} ${daysText})` : sk
             const actor = findPlayerByNumber(gameState.players, a.actorNumber);
 
             if (actor && actor.skillCancelled) {
-                addLog(a, { type: "cancelled_action", cancelled: true });
+                // Don't log cancelled investigations/reveals/observes - just skip them silently
+                if (!["investigate", "reveal", "observe"].includes(a.type)) {
+                    addLog(a, { type: "cancelled_action", cancelled: true });
+                }
                 canceledActionIndices.add(i);
                 return;
             }
@@ -641,18 +634,27 @@ btn.textContent = cd > 0 ? `${skill.name} (Available in ${cd} ${daysText})` : sk
         });
 
         // ======= PHASE 3: Investigations / Reveals =======
+        const duwendeCancelled = nightActions.some(act => act.type === "cancelAllAbilities");
+        
         nightActions.forEach((a, i) => {
             if (canceledActionIndices.has(i)) return;
             if (!["investigate", "reveal", "observe"].includes(a.type)) return;
-
+        
             const actor = findPlayerByNumber(gameState.players, a.actorNumber);
             
-            if (actor && actor.skillCancelled) {
-                addLog(a, { type: "cancelled_action", cancelled: true });
+            // Check if this action was cancelled by Duwende or other effects
+            if (actor && actor.skillCancelled && !isCreatureRole(actor.role)) {
                 canceledActionIndices.add(i);
-                return;
+                return; // Skip completely - no logging
             }
-
+            
+            // Double-check Duwende cancellation for non-immune human abilities
+            if (duwendeCancelled && actor && !isCreatureRole(actor.role) && 
+                !actor.role.includes('Babaylan') && !actor.role.includes('Manlalakbay')) {
+                canceledActionIndices.add(i);
+                return; // Skip completely - no logging
+            }
+        
             const targ = findPlayerByNumber(gameState.players, a.target);
 
             if (!targ || global.kapreBlockInvestigations || targ.immuneToInvestigations) {
@@ -666,16 +668,16 @@ btn.textContent = cd > 0 ? `${skill.name} (Available in ${cd} ${daysText})` : sk
             }
 
             if (a.type === "investigate") {
-                const kind = isCreatureRole(targ.role) ? "Mythical" : "Human";
-                addLog(a, { type: "investigate_success", result: `${kind} — ${targ.role}` });
-            } else if (a.type === "reveal") {
-                addLog(a, { type: "reveal", result: `${targ.role}` });
-            } else if (a.type === "observe") {
-                let result = "Mortal";
-                if (isCreatureRole(targ.role)) result = "Dark Aura";
-                else if (/\[KILLER\]|\[SUPPORT\]|\[UTILITY\]/.test(targ.role)) result = "With Powers";
-                addLog(a, { type: "observe", result });
-            }
+            const kind = isCreatureRole(targ.role) ? "Mythical" : "Human";
+            addLog(a, { type: "investigate_success", result: kind }); // Don't include role
+        } else if (a.type === "reveal") {
+            addLog(a, { type: "reveal_success" }); // Don't include role
+        } else if (a.type === "observe") {
+            let result = "Mortal";
+            if (isCreatureRole(targ.role)) result = "Dark Aura";
+            else if (/\[KILLER\]|\[SUPPORT\]|\[UTILITY\]/.test(targ.role)) result = "With Powers";
+            addLog(a, { type: "observe", result });
+        }
         });
 
         // ======= PHASE 4: Kills =======
