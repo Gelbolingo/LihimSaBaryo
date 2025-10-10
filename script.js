@@ -272,6 +272,20 @@
         };
 
         document.getElementById('nightNumber').textContent = gameState.dayNumber;
+        // Check if Duwende used cancel last night and block human abilities
+        const lastNight = gameState.nightLog || [];
+        const duwendeCancelled = lastNight.some(
+            entry => entry.type === "cancelAllAbilities"
+        );
+
+        if (duwendeCancelled) {
+            gameState.players.forEach(p => {
+                if (!isCreatureRole(p.role) && p.role !== "Tagabaryo") {
+                    p.skillCancelled = true;
+                }
+            });
+        }
+
         loadPlayer();
     }
 
@@ -288,6 +302,14 @@
         }
 
         const player = gameState.players[currentIndex];
+        // Skip player if their abilities were cancelled
+        if (player.skillCancelled && !isCreatureRole(player.role)) {
+            document.getElementById('useBtn').style.display = 'none';
+            nightState.currentIndex++;
+            setTimeout(() => loadPlayer(), 500);
+            return;
+        }
+
         
         // Skip dead players and Tagabaryo
         if (!player.alive || player.role.includes('Tagabaryo')) {
