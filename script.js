@@ -81,54 +81,49 @@
     function clearGameState() {
         localStorage.removeItem('gameState');
     }
+    
     // ==================== REVEAL ====================
-// Display message with a "Next" button, waits until clicked
-function showRevealCard(message) {
-  return new Promise(resolve => {
-    // Create overlay
-    const overlay = document.createElement("div");
-    overlay.className = "reveal-overlay";
+    function showRevealCard(message) {
+        return new Promise(resolve => {
+            const overlay = document.createElement("div");
+            overlay.className = "reveal-overlay";
 
-    // Card container
-    const card = document.createElement("div");
-    card.className = "reveal-card";
-    card.innerHTML = `
-      <p>${message}</p>
-      <button class="next-btn">Next</button>
-    `;
+            const card = document.createElement("div");
+            card.className = "reveal-card";
+            card.innerHTML = `
+              <p>${message}</p>
+              <button class="next-btn">Next</button>
+            `;
 
-    overlay.appendChild(card);
-    document.body.appendChild(overlay);
+            overlay.appendChild(card);
+            document.body.appendChild(overlay);
 
-    // Handle button click
-    card.querySelector(".next-btn").addEventListener("click", () => {
-      overlay.remove();
-      resolve(); // Continue game after click
-    });
-  });
-}
+            card.querySelector(".next-btn").addEventListener("click", () => {
+                overlay.remove();
+                resolve();
+            });
+        });
+    }
 
-// Main reveal logic
-async function showImmediateReveal(actor, targetPlayer, skillType) {
-  if (!actor || !targetPlayer) return;
+    async function showImmediateReveal(actor, targetPlayer, skillType) {
+        if (!actor || !targetPlayer) return;
 
-  let message = "";
+        let message = "";
 
-  if (actor.role?.includes("Babaylan")) {
-    message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
-    await showRevealCard(message); // waits for click
-  } 
-  else if (skillType === "reveal") {
-    message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
-    await showRevealCard(message);
-  } 
-  else if (skillType === "investigate" || skillType === "observe") {
-    const aura = getAuraForPlayer(targetPlayer);
-    message = `You (Player ${actor.number} - ${actor.role}) discovered Player ${targetPlayer.number}: ${aura}`;
-    await showRevealCard(message);
-  }
-}
-
+        if (actor.role?.includes("Babaylan")) {
+            message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
+            await showRevealCard(message);
+        } 
+        else if (skillType === "reveal") {
+            message = `You (Player ${actor.number} - ${actor.role}) revealed Player ${targetPlayer.number}: ${targetPlayer.role}`;
+            await showRevealCard(message);
+        } 
+        else if (skillType === "investigate" || skillType === "observe") {
+            const aura = getAuraForPlayer(targetPlayer);
+            message = `You (Player ${actor.number} - ${actor.role}) discovered Player ${targetPlayer.number}: ${aura}`;
+            await showRevealCard(message);
+        }
+    }
 
     // ==================== LOBBY PAGE ====================
     window.createLobby = function() {
@@ -159,23 +154,24 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
             else if (slot === "Villager") finalRole = "Tagabaryo";
             
             return {
-				number: i + 1,
-				name: `Player ${i + 1}`,
-				role: finalRole,
-				alive: true,
-				protected: false,
-				protectedBy: null,
-				anting: 0,
-				cursed: false,
-				silenced: false,
-				paralyzed: false,
-				immuneToInvestigations: finalRole.includes('Mang-aanting'),
-				immuneToReveals: finalRole.includes('Mang-aanting'),
-				meta: { 
-					cooldowns: {},
-					baganiProtectedPlayers: [] 
-				}
-			};
+                number: i + 1,
+                name: `Player ${i + 1}`,
+                role: finalRole,
+                alive: true,
+                protected: false,
+                protectedBy: null,
+                anting: 0,
+                cursed: false,
+                cursedBy: null,
+                silenced: false,
+                paralyzed: false,
+                immuneToInvestigations: finalRole.includes('Mang-aanting'),
+                immuneToReveals: finalRole.includes('Mang-aanting'),
+                meta: { 
+                    cooldowns: {},
+                    baganiProtectedPlayers: [] 
+                }
+            };
         });
 
         const gameState = {
@@ -193,7 +189,6 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
             <p><strong>Creatures:</strong> ${config.creatures}</p>
             <p><strong>Humans with Abilities:</strong> ${config.abilities}</p>
             <p><strong>Villagers (Tagabaryo):</strong> ${config.villagers}</p>
-           
         `;
 
         const playerList = document.getElementById('playerList');
@@ -218,7 +213,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
             { name: "Reveal Role", type: "reveal", needsTarget: true, cooldown: 2 }
         ];
         if (role.includes('Mangkukulam')) return [{ name: "Curse", type: "curse", needsTarget: true, cooldown: 2 }];
-        if (role.includes('Tiyanak')) return []; // Tiyanak has no active skills
+        if (role.includes('Tiyanak')) return [];
         if (role.includes('Duwende'))  return [{ name: "Cancel All Human Abilities", type: "cancelAllAbilities", needsTarget: false, cooldown: 2 }];
         if (role.includes('Kapre')) return [{ name: "Create Smoke (block investigations)", type: "blockInvestigations", needsTarget: false, cooldown: 2 }];
         if (role.includes('Tikbalang')) return [{ name: "Silence", type: "silence", needsTarget: true, cooldown: 2 }];
@@ -254,22 +249,18 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
             return;
         }
 
-        // Sort players: Batibat first, then other creatures, then humans
         gameState.players.sort((a, b) => {
             const aIsBatibat = a.role.includes('Batibat');
             const bIsBatibat = b.role.includes('Batibat');
             const aIsCreature = isCreatureRole(a.role);
             const bIsCreature = isCreatureRole(b.role);
 
-            // Batibat always goes first
             if (aIsBatibat && !bIsBatibat) return -1;
             if (!aIsBatibat && bIsBatibat) return 1;
 
-            // Then other creatures
             if (aIsCreature && !bIsCreature) return -1;
             if (!aIsCreature && bIsCreature) return 1;
 
-            // Within same group, maintain player number order
             return a.number - b.number;
         });
 
@@ -296,8 +287,16 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
         }
 
         const player = gameState.players[currentIndex];
+        
+        // Skip dead players and Tagabaryo
+        if (!player.alive || player.role.includes('Tagabaryo')) {
+            nightState.currentIndex++;
+            loadPlayer();
+            return;
+        }
+
         document.getElementById('playerName').textContent = `Player ${player.number}`;
-        document.getElementById('playerRole').textContent = `${player.role}${player.alive ? "" : " (DEAD)"}`;
+        document.getElementById('playerRole').textContent = player.role;
         
         const statusEl = document.getElementById('statusEffects');
         const statuses = [];
@@ -311,11 +310,27 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
         circleArea.classList.add('hidden');
         circleArea.innerHTML = '';
         
-        const isTagabaryo = player.role.includes('Tagabaryo');
         const isTiyanak = player.role.includes('Tiyanak');
         const isParalyzed = player.paralyzed;
+        const skills = getSkillsForRole(player.role);
         
-        document.getElementById('useBtn').style.display = (player.alive && !isTagabaryo && !isTiyanak && !isParalyzed) ? 'inline-block' : 'none';
+        // If paralyzed or Tiyanak (no skills), auto-skip
+        if (isParalyzed || isTiyanak) {
+            document.getElementById('useBtn').style.display = 'none';
+            nightState.currentIndex++;
+            setTimeout(() => loadPlayer(), 500);
+            return;
+        }
+        
+        // If player has exactly one skill, automatically show it
+        if (skills.length === 1) {
+            document.getElementById('useBtn').style.display = 'none';
+            setTimeout(() => useSkill(), 100);
+        } else if (skills.length > 1) {
+            document.getElementById('useBtn').style.display = 'inline-block';
+        } else {
+            document.getElementById('useBtn').style.display = 'none';
+        }
     }
 
     window.useSkill = function() {
@@ -374,30 +389,25 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
     };
 
     async function showTargetSelection(skill) {
-    if (!nightState) return;
+        if (!nightState) return;
 
-    const { gameState, currentIndex } = nightState;
-    const cur = gameState.players[currentIndex];
-    const circleArea = document.getElementById('circleArea');
-    circleArea.innerHTML = '';
+        const { gameState, currentIndex } = nightState;
+        const cur = gameState.players[currentIndex];
+        const circleArea = document.getElementById('circleArea');
+        circleArea.innerHTML = '';
 
-    // Sort players by number for target selection display
-    const sortedPlayers = gameState.players.slice().sort((a, b) => a.number - b.number);
+        const sortedPlayers = gameState.players.slice().sort((a, b) => a.number - b.number);
 
-    sortedPlayers.forEach(p => {
-        // Bagani special rules: cannot protect himself, cannot protect same player twice
-        const isBagani = cur.role.includes('Bagani');
-        const isSelf = p.number === cur.number;
-        const alreadyProtectedByBagani = isBagani && cur.meta.baganiProtectedPlayers && cur.meta.baganiProtectedPlayers.includes(p.number);
-        
-        // Mang-aanting can now only target others, not himself
-        const isMangAanting = cur.role.includes('Mang-aanting');
-
-        // Albularyo can target himself too
-        const isAlbularyo = cur.role.includes('Albularyo');
-        const canTargetSelf = isAlbularyo;
-        
-        if (p.alive && !(isSelf && !canTargetSelf) && !alreadyProtectedByBagani) {
+        sortedPlayers.forEach(p => {
+            const isBagani = cur.role.includes('Bagani');
+            const isSelf = p.number === cur.number;
+            const alreadyProtectedByBagani = isBagani && cur.meta.baganiProtectedPlayers && cur.meta.baganiProtectedPlayers.includes(p.number);
+            
+            const isMangAanting = cur.role.includes('Mang-aanting');
+            const isAlbularyo = cur.role.includes('Albularyo');
+            const canTargetSelf = isAlbularyo;
+            
+            if (p.alive && !(isSelf && !canTargetSelf) && !alreadyProtectedByBagani) {
                 const div = document.createElement('div');
                 div.className = 'player-circle';
                 div.textContent = `P${p.number}`;
@@ -413,7 +423,6 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
 
                     cur.meta.cooldowns[skill.type] = skill.cooldown || 0;
 
-                    // Track Bagani protected players
                     if (isBagani) {
                         if (!cur.meta.baganiProtectedPlayers) {
                             cur.meta.baganiProtectedPlayers = [];
@@ -421,7 +430,6 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
                         cur.meta.baganiProtectedPlayers.push(p.number);
                     }
 
-                    // IMMEDIATE REVEALS: Show role information immediately
                     if (skill.type === "reveal" || skill.type === "investigate" || skill.type === "observe") {
                         await showImmediateReveal(cur, p, skill.type);
                     }
@@ -548,6 +556,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
                     if (targ) {
                         if (targ.cursed) {
                             targ.cursed = false;
+                            targ.cursedBy = null;
                             addLog(a, { type: "heal_curse" });
                         }
                         if (targ.silenced) {
@@ -560,6 +569,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
                     if (targ) {
                         if (targ.cursed) {
                             targ.cursed = false;
+                            targ.cursedBy = null;
                             addLog(a, { type: "heal_curse" });
                         } else {
                             targ.protected = true;
@@ -587,6 +597,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
                 case "curse":
                     if (targ) {
                         targ.cursed = true;
+                        targ.cursedBy = actor.number;
                         addLog(a, { type: "curse" });
                     }
                     break;
@@ -600,7 +611,6 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
 
             const actor = findPlayerByNumber(gameState.players, a.actorNumber);
             
-            // Check if actor's skill was cancelled by Duwende
             if (actor && actor.skillCancelled) {
                 addLog(a, { type: "cancelled_action", cancelled: true });
                 canceledActionIndices.add(i);
@@ -614,7 +624,6 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
                 return;
             }
 
-            // Check for Anting-Anting reveal immunity
             if ((a.type === "reveal" || a.type === "investigate") && targ.immuneToReveals) {
                 addLog(a, { type: "investigate_fail" });
                 return;
@@ -633,7 +642,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
             }
         });
 
-       // ======= PHASE 4: Kills =======
+        // ======= PHASE 4: Kills =======
         if (!global.preventKills) {
             nightActions.forEach((a, i) => {
                 if (canceledActionIndices.has(i)) return;
@@ -641,7 +650,6 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
                 
                 const actor = findPlayerByNumber(gameState.players, a.actorNumber);
                 
-                // Check if actor's skill was cancelled by Duwende
                 if (actor && actor.skillCancelled) {
                     addLog(a, { type: "cancelled_action", cancelled: true });
                     canceledActionIndices.add(i);
@@ -690,17 +698,24 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
             });
         }
 
-        // ======= PHASE 5: Cursed deaths =======
+        // ======= PHASE 5: Cursed deaths (only if Mangkukulam is alive) =======
         gameState.players.forEach(p => {
-            if (p.cursed && p.alive) {
-                p.alive = false;
-                gameState.nightLog.push({
-                    actorName: `Player ${p.number}`,
-                    actorRole: p.role,
-                    skillName: "Cursed Death",
-                    type: "cursed_death",
-                    target: p.number
-                });
+            if (p.cursed && p.alive && p.cursedBy) {
+                const mangkukulam = findPlayerByNumber(gameState.players, p.cursedBy);
+                if (mangkukulam && mangkukulam.alive) {
+                    p.alive = false;
+                    gameState.nightLog.push({
+                        actorName: `Player ${p.number}`,
+                        actorRole: p.role,
+                        skillName: "Cursed Death",
+                        type: "cursed_death",
+                        target: p.number
+                    });
+                } else {
+                    // Mangkukulam died, curse is lifted
+                    p.cursed = false;
+                    p.cursedBy = null;
+                }
             }
         });
 
@@ -751,8 +766,7 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
         if (!gameState) return;
 
         let phaseName = "";
-        switch (gameState.phase) {
-            case "night": phaseName = "Night"; break;
+        switch (gameState.phase) {case "night": phaseName = "Night"; break;
             case "day": phaseName = "Day"; break;
             case "discussion": phaseName = "Discussion"; break;
             default: phaseName = "Day";
@@ -799,7 +813,6 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
             summary.innerHTML = "<h3>Night Summary</h3><p>No actions recorded.</p>";
         }
 
-        // Display silenced players
         const silencedPlayers = gameState.players.filter(p => p.alive && p.silenced);
         if (silencedPlayers.length > 0) {
             const silencedDiv = document.createElement('div');
@@ -813,7 +826,6 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
             summary.appendChild(silencedDiv);
         }
 
-        // Display paralyzed players
         const paralyzedPlayers = gameState.players.filter(p => p.alive && p.paralyzed);
         if (paralyzedPlayers.length > 0) {
             const paralyzedDiv = document.createElement('div');
@@ -878,49 +890,47 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
     }
 
     // ==================== VOTING PHASE ====================
-	function initVotingPhase() {
-		const gameState = loadGameState();
-		if (!gameState) {
-			alert('No game found.');
-			window.location.href = 'lobby.html';
-			return;
-		}
+    function initVotingPhase() {
+        const gameState = loadGameState();
+        if (!gameState) {
+            alert('No game found.');
+            window.location.href = 'lobby.html';
+            return;
+        }
 
-		document.getElementById('voteDayNum').textContent = gameState.dayNumber;
-		
-		const voteOptions = document.getElementById('voteOptions');
-		
-		// Sort players by number for voting display
-		const sortedPlayers = gameState.players
-			.filter(p => p.alive && !p.paralyzed)
-			.sort((a, b) => a.number - b.number);
-		
-		// Show message if there are paralyzed players who cannot vote
-		const paralyzedVoters = gameState.players.filter(p => p.alive && p.paralyzed);
-		if (paralyzedVoters.length > 0) {
-			const msgDiv = document.createElement('div');
-			msgDiv.style.padding = '10px';
-			msgDiv.style.marginBottom = '15px';
-			msgDiv.style.backgroundColor = '#e1f5fe';
-			msgDiv.style.border = '2px solid #03a9f4';
-			msgDiv.style.borderRadius = '8px';
-			msgDiv.style.color = '#01579b';
-			msgDiv.innerHTML = `<strong>Note:</strong> ${paralyzedVoters.map(p => `Player ${p.number}`).join(', ')} ${paralyzedVoters.length === 1 ? 'is' : 'are'} paralyzed and cannot vote.`;
-			voteOptions.insertAdjacentElement('beforebegin', msgDiv);
-		}
-		
-		voteOptions.innerHTML = sortedPlayers
-			.map(p => {
-				const isCreature = isCreatureRole(p.role);
-				const tag = isCreature ? 'creature' : 'human';
-				return `
-					<div class="vote-option" onclick="votePlayer(${p.number})">
-						Player ${p.number} - ${p.role} 
-						<span class="role-tag ${tag}">${isCreature ? 'CREATURE' : 'HUMAN'}</span>
-					</div>
-				`;
-			}).join('');
-	}
+        document.getElementById('voteDayNum').textContent = gameState.dayNumber;
+        
+        const voteOptions = document.getElementById('voteOptions');
+        
+        const sortedPlayers = gameState.players
+            .filter(p => p.alive && !p.paralyzed)
+            .sort((a, b) => a.number - b.number);
+        
+        const paralyzedVoters = gameState.players.filter(p => p.alive && p.paralyzed);
+        if (paralyzedVoters.length > 0) {
+            const msgDiv = document.createElement('div');
+            msgDiv.style.padding = '10px';
+            msgDiv.style.marginBottom = '15px';
+            msgDiv.style.backgroundColor = '#e1f5fe';
+            msgDiv.style.border = '2px solid #03a9f4';
+            msgDiv.style.borderRadius = '8px';
+            msgDiv.style.color = '#01579b';
+            msgDiv.innerHTML = `<strong>Note:</strong> ${paralyzedVoters.map(p => `Player ${p.number}`).join(', ')} ${paralyzedVoters.length === 1 ? 'is' : 'are'} paralyzed and cannot vote.`;
+            voteOptions.insertAdjacentElement('beforebegin', msgDiv);
+        }
+        
+        voteOptions.innerHTML = sortedPlayers
+            .map(p => {
+                const isCreature = isCreatureRole(p.role);
+                const tag = isCreature ? 'creature' : 'human';
+                return `
+                    <div class="vote-option" onclick="votePlayer(${p.number})">
+                        Player ${p.number} - ${p.role} 
+                        <span class="role-tag ${tag}">${isCreature ? 'CREATURE' : 'HUMAN'}</span>
+                    </div>
+                `;
+            }).join('');
+    }
 
     window.votePlayer = function(playerNumber) {
         const gameState = loadGameState();
@@ -1056,7 +1066,6 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
     // =========TIMER & SKIP FUNCTIONALITY========= 
     let countdown;
 
-    // FIXED: Skip timer function
     window.skipTimer = function() {
         if (countdown) {
             clearInterval(countdown);
@@ -1064,7 +1073,6 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
         window.location.href = "voting.html";
     };
 
-    // Initialize timer on page load
     if (window.location.pathname.includes("Discussion.html")) {
         setTimeout(() => {
             startTimer(1);
@@ -1112,7 +1120,6 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
         });
     }
 
-    // FIXED: Attach skip button handler
     document.addEventListener('DOMContentLoaded', function() {
         const skipBtn = document.getElementById("skip-btn");
         if (skipBtn) {
@@ -1120,6 +1127,5 @@ async function showImmediateReveal(actor, targetPlayer, skillType) {
         }
     });
 
-    // Expose necessary functions to window
     window.advancePhase = advancePhase;
 })();
